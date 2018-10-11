@@ -1,0 +1,24 @@
+2. Given a node v from a graph G, maximum path length L, predecessor matrix \Pi[i,j] , and matrix D[i,j] of the length of the shortest path between nodes i and j, where i and j = 0...|V|
+Name each node with an integer.
+def modifiedBetweenness(Pi,D,L,v):
+    cnt = 0
+    for i in 1..|V|:
+        for j in 1..|V|:
+            current = j
+            predecessor = Pi[i,j]
+            l = 0
+            v_seen = false
+            #Figure out length of shortest path between nodes i and j
+            #Stop early if we can
+            while predecessor != null && l<L:
+                if current == v:
+                    v_seen = true
+                l = l + D[predecessor_of_j,j]
+                current = predecessor
+                predecessor = Pi[i,predecessor]
+            if current==i && predecessor==null && l<l && v_seen:
+                cnt = cnt + 1
+    return cnt
+    
+Complexity:
+    We have three nested loops. The while-loop runs at worst |V| times since we cannot have more predecessors than nodes in the graph. That makes the worst-case complexity O(n^3). In the best case, the while loop never executes and the complexity is O(n^2+n) = O(n^2)
