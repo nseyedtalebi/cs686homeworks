@@ -1,3 +1,5 @@
+Note: we assume that an entry in the adjacency matrix A[i,j] represents whether or not an edge exists _from_ i _to_ j.  Some texts would say that A[i,j] represents a possible edge from j to i. One is the transpose of the other.
+
 2. Given a node v from a graph G, maximum path length L, predecessor matrix \Pi[i,j] , and matrix D[i,j] of the length of the shortest path between nodes i and j, where i and j = 0...|V|
 Name each node with an integer.
 def modifiedBetweenness(Pi,D,L,v):
@@ -22,3 +24,29 @@ def modifiedBetweenness(Pi,D,L,v):
     
 Complexity:
     We have three nested loops. The while-loop runs at worst |V| times since we cannot have more predecessors than nodes in the graph. That makes the worst-case complexity O(n^3). In the best case, the while loop never executes and the complexity is O(n^2+n) = O(n^2)
+    
+5. The eigenvalue centrality of a DAG is zero. The eigenvector centrality of a node is based on the centrality of its neighbors. In a DAG, there is at least one node with indegree zero. That node has zero centrality and "spreads" the zero centrality to its neighbors. Alternatively, for a node to have a nonzero eigenvector centrality, it must be part of a strongly-connected component with 2 or more vertices or have an in edge from such a component. There is no such component in a DAG by defintion.
+
+Before I found the bit about SCCs in the notes and suggested textbook (Newman), I came up with the following informal proof:
+-Lemma: The adjacency matrix for a graph G with vertices numbered according to G's topological sorting is upper or lower triangular depending on whether A_ij represents an edge from i to j or from j to i
+-Each entry on the main diagonal of a triangular matrix is an eigenvalue of that matrix. (A well-known result. I verified that I remembered correctly by reading https://en.wikipedia.org/wiki/Triangular_matrix)
+-Each entry on the main diagonal of a DAG's adjacency matrix must be zero by definition
+-Therefore, the adjacency matrix for a DAG has no nonzero eigenvalues
+
+Informal proof of the lemma:
+"Introduction to Algorithms" by Cormen et al. defines the topological sort of a dag G = (V,E) as, "a linear ordering of all its vertices such that if G contains an
+edge (u,v), then u appears before v in the ordering." Name the nodes in G so that the rows and columns of the adjacency matrix are ordered according to the topological sorting. In other words, for each node i from 1 to |V|, node i precedes node i+1 in the sorted order. Now, asumme for the purpose of obtaining a contradiction that A is not upper triangular. From the definition of upper triangular, there must be some nonzero entry A[i,j] where i > j. Howver, i > j implies that j precedes i in the sorted order, a contradiction.
+
+7. Ford-Fulkerson can be adapted to find a maximum bipartite matching for bipartite graph G = (L \cup R,E) by building a flow network G_flow and running Ford-Fulkerson on it. The network is constructed as follows:
+-Add all of the nodes L \cup R from G
+-Add directed edges from L to R for each edge in G
+-Add source and sink nodes s and t, respectively
+-Add edges from s to each node in L and from each node in R to t
+-Set capacity of all edges to 1
+
+Since each edge has capacity 1 and Ford-Fulkerson always chooses the maximum flow for each augmenting path, each part of each augmenting path will be saturated and unable to carry more flow. This preserves the one-to-one matching as required by the bipartite matching problem. Thus, each unit of flow that passes between L and R represents a matching. By achieving maximum flow in this specially-constructed network, we also find a maximum bipartite matching. 
+
+8. A star must have exactly n-1 edges since one node has degree n-1 and the others have degree 1. We can find the probability that an Erdos-Renyi graph has a certain number of edges and the probability that is has a node with a given degree, so by multiplying the two, we can find the probability that an Erdos-Renyi graph is a star:
+<still need to typeset my handwritten solution>
+Note that if we stipulate that *some* node in the graph has degree n-1 and fix the number of edges to n-1, then the other nodes can have at most degree 1 because all n-1 edges are connected to a single node on one side. It's imporant that we constrain both number of edges and degree since both are necessary to define a star.
+
