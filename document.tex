@@ -1,0 +1,157 @@
+\documentclass[]{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{savetrees}
+%opening
+\title{CS686 Complex Networks Homework 1}
+\author{Nima Seyedtalebi}
+
+\begin{document}
+
+\maketitle
+
+
+\begin{enumerate}
+	\item Given a graph G = (V,E) whose vertices represent scientific papers and edges represent citations, the cocitation matrix $C = c_{ij} \forall {i,j} = 1\dots n$, where $c_{i,j} = \sum_{k=1}^{n} A_{ik}A_{jk}$ Each $c_{ij}$ counts how many vertices have outgoing edges to both i and j. Equivalently, we can define $C = AA^T$ where $A$ is the adjacency matrix of $G$. 
+	\begin{figure}[h!]
+		\includegraphics[scale=1]{cs686_hw1_problem1.png}
+		\caption{Example network}
+		\label{fig:prob1}
+	\end{figure}
+
+
+	$A =  \begin{bmatrix}0&0&1\\
+	0&0&1\\
+	0&0&0
+	\end{bmatrix}$ 	$A^T =  \begin{bmatrix}0&0&0\\
+	0&0&0\\
+	1&1&0
+	\end{bmatrix}$
+	
+	$C=AA^T=\begin{bmatrix}
+	1&1&0\\
+	1&1&0\\
+	0&0&0
+	\end{bmatrix}$
+	
+	\item  Given a node v from a graph G, maximum path length L, predecessor matrix $\Pi[i,j]$ , and matrix $D[i,j]$ of the length of the shortest path between nodes i and j, where i and j = 0...|V|
+	Name each node with an integer.
+	
+	\begin{verbatim}
+def modifiedBetweenness(Pi,D,L,v):
+  cnt = 0
+  for i in 1..|V|:
+    for j in 1..|V|:
+      current = j
+      predecessor = Pi[i,j]
+      l = 0
+      v_seen = false
+      #Figure out length of shortest path between nodes i and j
+      #Stop early if we can
+      while predecessor != null && l<L:
+        if current == v:
+          v_seen = true
+        l = l + D[predecessor_of_j,j]
+        current = predecessor
+        predecessor = Pi[i,predecessor]
+        if current==i && predecessor==null && l<l && v_seen:
+          cnt = cnt + 1
+  return cnt
+	
+	\end{verbatim}
+
+	Complexity:
+	We have three nested loops. The while-loop runs at worst $|V|$ times since we cannot have more predecessors than nodes in the graph. That makes the worst-case complexity $O(n^3)$. In the best case, the while loop never executes and the complexity is $O(n^2+n) = O(n^2)$
+
+
+	\item 	Please see figure \ref{fig:prob3} on the following page. The sequence of visited nodes is indicated through the start, end, and predecessor values. The final image shows the three connected components, the vertices of which are: $\{1\}, \{2,3,4,5,6,7,8,10\}, \{9\}$
+	
+	
+	\begin{figure}[H]
+		\includegraphics[width=\linewidth,height=\textheight]{cs686_hw1_problem3.png}
+		\caption{Execution of DFS with SCCs at the end}
+		\label{fig:prob3}
+	\end{figure}
+
+
+	\item \begin{minipage}[t]{\linewidth}
+			\begin{enumerate}
+				\item A node that has high degree and low betweenness centrality: node marked with x of first graph.
+				
+				\item A node has high closeness centrality and low degree: a star. See marked vertex in second example graph.
+			\end{enumerate}
+			\begin{figure}[H]
+				\includegraphics[scale=0.5]{cs686_hw1_problem4.png}
+				\caption{Example networks}
+				\label{fig:prob4}
+			\end{figure}
+	\end{minipage} 
+
+	\item The eigenvalue centrality of a DAG is zero. The eigenvector centrality of a node is based on the centrality of its neighbors. In a DAG, there is at least one node with in-degree zero. That node has zero centrality and "spreads" the zero centrality to its neighbors. Alternatively, for a node to have a nonzero eigenvector centrality, it must be part of a strongly-connected component with 2 or more vertices or have an in edge from such a component. There is no such component in a DAG by definition.
+	
+	Before I found the bit about SCCs in the notes and suggested textbook (Newman), I came up with the following informal proof:
+	\begin{itemize}
+	\item Lemma: The adjacency matrix for a graph G with vertices numbered according to G's topological sorting is upper or lower triangular depending on whether $A_{ij}$ represents an edge from i to j or from j to i
+	\item Each entry on the main diagonal of a triangular matrix is an eigenvalue of that matrix. 
+	\item Each entry on the main diagonal of a DAG's adjacency matrix must be zero by definition
+	\item Therefore, the adjacency matrix for a DAG has no nonzero eigenvalues
+	\end{itemize}
+	Informal proof of the lemma:
+	"Introduction to Algorithms" by Cormen et al. defines the topological sort of a dag $G = (V,E)$ as, "a linear ordering of all its vertices such that if $G$ contains an
+	edge $(u,v)$, then $u$ appears before $v$ in the ordering." Name the nodes in $G$ so that the rows and columns of the adjacency matrix are ordered according to the topological sorting. In other words, for each node $i$ from 1 to $|V|$, node $i$ precedes node $i+1$ in the sorted order. Now, assume for the purpose of obtaining a contradiction that $A$ is not upper triangular. From the definition of upper triangular, there must be some nonzero entry $A[i,j]$ where $i > j$. However, $i > j$ implies that $j$ precedes $i$ in the sorted order, a contradiction.
+	
+	\item \begin{minipage}[t]{\linewidth}
+	\begin{figure}[H]
+		\includegraphics[width=\linewidth,height=\textheight]{cs686_hw1_problem6.png}
+		\caption{An execution of Ford-Fulkerson}
+		\label{fig:prob6}
+	\end{figure}
+	\end{minipage}
+
+	\item Ford-Fulkerson can be adapted to find a maximum bipartite matching for bipartite graph $G = (L \cup R,E)$ by building a flow network $G_flow$ and running Ford-Fulkerson on it. The network is constructed as follows:
+	-Add all of the nodes $L \cup R$ from $G$
+	-Add directed edges from $L$ to $R$ for each edge in $G$
+	-Add source and sink nodes $s$ and $t$, respectively
+	-Add edges from $s$ to each node in $L$ and from each node in $R$ to $t$
+	-Set capacity of all edges to 1
+	
+	Since each edge has capacity 1 and Ford-Fulkerson always chooses the maximum flow for each augmenting path, each part of each augmenting path will be saturated and unable to carry more flow. This preserves the one-to-one matching as required by the bipartite matching problem. Thus, each unit of flow that passes between $L$ and $R$ represents a matching. By achieving maximum flow in this specially-constructed network, we also find a maximum bipartite matching. 
+	
+	\item A star must have exactly $n-1$ edges since one node has degree $n-1$ and the others have degree 1. We can find the probability that an Erdos-Renyi graph has a certain number of edges and the probability that is has a node with a given degree, so by multiplying the two, we can find the probability that an Erdos-Renyi graph is a star: ${{n \choose 2} \choose n-1}p^{2(n-1)}(1-p)^{{n \choose 2} - n + 2}$
+
+	Note that if we stipulate that \textit{some} node in the graph has degree n-1 and fix the number of edges to $n-1$, then the other nodes can have at most degree 1 because all $n-1$ edges are connected to a single node on one side. It is important that we constrain both number of edges and degree since both are necessary to define a star. The degree distribution does not specify the probability that a particular vertex has degree $n-1$, just that \textit{some} vertex has degree $n-1$. This accounts for the possibility of different stars with n nodes.
+	
+	\item  $(U,S)$ is an independence system
+	Proof:
+	From course notes:an independence system is a pair (U,s) where U is the universe set, $|U| < \infty$ and $S \subseteq 2^U$ such that:
+	$S$ contains the empty element and
+	if $x \subseteq y, y \in S => x \in S$
+	Let $W(s)$ be the total weight of the items in s
+	From the problem statement, we have a finite universe set $U$ of items and $S \subseteq 2^U$, the set of all item sets with total weight $<= B$. Thus, $(U,S)$ has the correct form.
+	$S$ trivially includes the empty set if B$ > 0$ because $W({})=0$.
+	Finally, if none of the items in $U$ have negative weight, for $X \subseteq Y$ and $Y \in S$, we know $X \in S$ because $|X| <= |Y|$, so $W(X) <= W(Y)$. Since $S = {s \in 2^U:W(s) <= B}$, $X$ must be in $S$.
+	
+	$(U,S)$ is not a matroid
+	Proof:
+	A matroid is an independence system with an additional property: if $X,Y \in S$ and $|X| > |Y|$, then $\exists x \in X/Y$ such that ${x} \cup Y \in S$. $(U,S)$ does not have this property. Consider this counterexample: Let $Y \in S$ be a set of a single item with weight $= B$. Let $X$ be a set of $B$ items with weight 1. $|X| > |Y|$, but we cannot add any element from $X$ to $Y$ and still have $Y \in S$.
+	
+	If $w_i = 1$ for each item $i=1,\dots,n$ then $(U,S)$ is a matroid:
+	Proof:
+	If we have sets $X$ and $Y$ as described in the definition of matroid and all item weights are 1, then $W(X) > W(Y)$ since $|X| > |Y|$. W can change by at most 1 for each element added or removed, so since the inequality between $X$ and $Y$ is strict, adding a single item to $Y$ makes $|Y|$ at most $|X|$.  Thus, we can add any item from set X to set Y and the new set will be in $S$, and this $(U,S)$ is a matroid.
+	
+	The above proof implies that there exists a greedy algorithm to solve this particular kind of Knapsack problem.
+	
+	\item Maximizing a monotone submodular function f is NP-Hard but we can use a greedy algorithm to obtain an approximate solution. We are maximizing f over a set U. The algorithm starts with an empty set $S$ and iteratively selects elements from $U$ to maximize the change in $f(S)$ from iteration $i-1$ to $i$. The algorithm terminate when $|S| = k$, the cardinality constraint. The results from Niemhouser et al. suggest that the approximation is good: $f(S_k)\ge 1 - (1/e)  \max\limits_{|S|<=k} f(S)$.
+	
+\end{enumerate}
+	\nocite{krause}
+	\nocite{cn}
+	\nocite{newman}
+	
+\bibliographystyle{plain}
+\bibliography{hw1}
+
+\end{document}
