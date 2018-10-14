@@ -48,5 +48,29 @@ Since each edge has capacity 1 and Ford-Fulkerson always chooses the maximum flo
 
 8. A star must have exactly n-1 edges since one node has degree n-1 and the others have degree 1. We can find the probability that an Erdos-Renyi graph has a certain number of edges and the probability that is has a node with a given degree, so by multiplying the two, we can find the probability that an Erdos-Renyi graph is a star:
 <still need to typeset my handwritten solution>
-Note that if we stipulate that *some* node in the graph has degree n-1 and fix the number of edges to n-1, then the other nodes can have at most degree 1 because all n-1 edges are connected to a single node on one side. It's imporant that we constrain both number of edges and degree since both are necessary to define a star.
+Note that if we stipulate that *some* node in the graph has degree n-1 and fix the number of edges to n-1, then the other nodes can have at most degree 1 because all n-1 edges are connected to a single node on one side. It's imporant that we constrain both number of edges and degree since both are necessary to define a star. The degree distribution does not specify the probability that a particular vertex has degree n-1, just that *some* vertex has degree n-1. This accounts for the possilbility of different stars with n nodes.
+
+9. (U,S) is an independence system
+Proof:
+From course notes:an independence system is a pair (U,s) where U is the universe set, |U| < \infinity and S \subset 2^U or S is a subset of the  powerset of U such that:
+		S contains the empty element
+		if x \subset y, y \in S => x \in S
+Let W(s) be the total weight of the items in s
+From the problem statement, we have a finite universe set U of items and S \subset 2^U, the set of all item sets with total weight <= B. Thus, (U,S) has the correct form.
+S trivially includes the empty set if B > 0 becaue W({})=0.
+Finally, if none of the items in U have negative weight, for X \subset Y and Y \in S, we know X \in S because |X| <= |Y|, so W(X) <= W(Y). Since S = {s \in 2^U:W(s) <= B}, X must be in S.
+
+(U,S) is not a matroid
+Proof:
+A matroid is an independence system with an additional property: if X,Y \in S and |X| > |Y|, then \exists x \in X/Y such that {x} \cup Y \in S. (U,S) does not have this property. Consider this counterexample: Let Y \in S be a set of a single item with weight = B. Let X be a set of B items with weight 1. |X| > |Y|, but we cannot add any element from X to Y and still have Y \in S.
+
+If w_i = 1 for each item i=1,...,n then (U,S) is a matroid:
+Proof:
+If we have sets X and Y as described in the definition of matroid and all item weights are 1, then W(X) > W(Y) since |X| > |Y|. W can change by at most 1 for each element added or removed, so since the inequality betwen X and Y is strict, adding a single item to Y makes |Y| at most |X|.  Thus, we can add any item from set X to set Y and the new set will be in S, and this (U,S) is a matroid.
+
+The above proof implies that there exists a greedy algorithm to solve this particular kind of Knapsack problem.
+
+10. Maximizing a monotone submodular function f is NP-Hard but we can use a greedy algorithm to obtain an approximate solution. We are maximizing f over a set U. The algorithm starts with an empty set S and iteratively selects elements from U to maximize the change in f(S) from iteration i-1 to i. The algorithm terminate when |S| = k, the cardinality constraint. The results from Niemhouser et al. suggest that the approximation is good: f(s_k)>= 1 - (1/e) * max(s,|s|<=k ^ s subset U,f(s)).
+
+
 
